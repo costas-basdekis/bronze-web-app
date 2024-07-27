@@ -20,6 +20,8 @@ class App extends React.Component<{}, AppState> {
           <h1>Bronze</h1>
           <label>Current player: {currentPlayerIndex}</label>
           <br/>
+          <button onClick={this.onFinishTurn}>Finish turn</button>
+          <br/>
           <ol>
             {moveDescriptions.map(description => (
               <li>{description}</li>
@@ -29,6 +31,16 @@ class App extends React.Component<{}, AppState> {
       </div>
     );
   }
+
+  onFinishTurn = () => {
+    this.setState(({ currentPlayerIndex, moveDescriptions }) => {
+      const newCurrentPlayerIndex = currentPlayerIndex === 1 ? 2 : 1;
+      return {
+        currentPlayerIndex: newCurrentPlayerIndex,
+        moveDescriptions: [...moveDescriptions, `Player ${currentPlayerIndex} finished their turn`],
+      };
+    });
+  };
 }
 
 export default App;
