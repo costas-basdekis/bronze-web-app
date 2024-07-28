@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {ChangeEvent} from 'react';
 import _ from "underscore";
 import './App.css';
 
@@ -37,6 +37,7 @@ interface Game {
 }
 
 interface AppState {
+  newGamePlayerCount: number,
   game: Game,
 }
 
@@ -63,15 +64,19 @@ function makePlayer(index: number): Player {
 
 class App extends React.Component<{}, AppState> {
   state: AppState = {
-    game: makeGame(4),
+    newGamePlayerCount: 2,
+    game: makeGame(2),
   };
 
   render() {
-    const { game: {currentPlayerIndex, moveDescriptions, players} } = this.state;
+    const { newGamePlayerCount, game: {currentPlayerIndex, moveDescriptions, players} } = this.state;
     return (
       <div className="App">
         <header className="App-header">
           <h1>Bronze</h1>
+          <label>Player count: {newGamePlayerCount} <input type={"range"} min={2} max={4} step={1} defaultValue={2} onChange={this.onNewGamePlayerCount} /></label>
+          <button onClick={this.onNewGameClick}>New game</button>
+          <hr/>
           <label>Current player: {currentPlayerIndex}</label>
           <br/>
           <button onClick={this.onFinishTurn}>Finish turn</button>
@@ -118,6 +123,18 @@ class App extends React.Component<{}, AppState> {
         },
       };
     });
+  };
+
+  onNewGamePlayerCount = (event: ChangeEvent<HTMLInputElement>) => {
+    this.setState({
+      newGamePlayerCount: parseInt(event.target.value),
+    });
+  };
+
+  onNewGameClick = () => {
+    this.setState(({ newGamePlayerCount }) => ({
+      game: makeGame(newGamePlayerCount),
+    }));
   };
 }
 
