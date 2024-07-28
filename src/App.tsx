@@ -1,4 +1,5 @@
 import React from 'react';
+import _ from "underscore";
 import './App.css';
 
 export type MoneyProductionStepMap = number[];
@@ -29,32 +30,44 @@ interface Player {
   moneyProductionStep: number,
 }
 
-interface AppState {
+interface Game {
   currentPlayerIndex: number,
   moveDescriptions: string[],
   players: Player[],
 }
 
-class App extends React.Component<{}, AppState> {
-  state = {
+interface AppState {
+  game: Game,
+}
+
+function makeGame(playerCount: number): Game {
+  return {
     currentPlayerIndex: 1,
     moveDescriptions: ["Game started"],
-    players: [
-      {
-        index: 1,
-        money: 17,
-        moneyProductionStep: 10,
-      },
-      {
-        index: 2,
-        money: 17,
-        moneyProductionStep: 10,
-      },
-    ],
+    players: makePlayers(playerCount),
+  };
+}
+
+function makePlayers(count: number): Player[] {
+  return _.range(1, count + 1)
+    .map(index => makePlayer(index));
+}
+
+function makePlayer(index: number): Player {
+  return {
+    index: index,
+    money: 17,
+    moneyProductionStep: 10,
+  };
+}
+
+class App extends React.Component<{}, AppState> {
+  state: AppState = {
+    game: makeGame(4),
   };
 
   render() {
-    const { currentPlayerIndex, moveDescriptions, players } = this.state;
+    const { game: {currentPlayerIndex, moveDescriptions, players} } = this.state;
     return (
       <div className="App">
         <header className="App-header">
@@ -94,11 +107,15 @@ class App extends React.Component<{}, AppState> {
   }
 
   onFinishTurn = () => {
-    this.setState(({ currentPlayerIndex, moveDescriptions }) => {
-      const newCurrentPlayerIndex = currentPlayerIndex === 1 ? 2 : 1;
+    this.setState(({ game }) => {
+      const { currentPlayerIndex, moveDescriptions, players } = game;
+      const newCurrentPlayerIndex = currentPlayerIndex === players.length ? 1 : currentPlayerIndex + 1;
       return {
-        currentPlayerIndex: newCurrentPlayerIndex,
-        moveDescriptions: [...moveDescriptions, `Player ${currentPlayerIndex} finished their turn`],
+        game: {
+          ...game,
+          currentPlayerIndex: newCurrentPlayerIndex,
+          moveDescriptions: [...moveDescriptions, `Player ${currentPlayerIndex} finished their turn`],
+        },
       };
     });
   };
