@@ -24,6 +24,22 @@ export function createMoneyProductionStepMap(): MoneyProductionStepMap {
 
 const moneyProductionStepMap: MoneyProductionStepMap = createMoneyProductionStepMap(); 
 
+export function findStepForReducedMoneyProduction(step: StepNumber, moneyProductionCount: MoneyProductionLevel = 3): StepNumber {
+  const currentMoneyProductionLevel = moneyProductionStepMap[step];
+  const targetMoneyProductionLevel = currentMoneyProductionLevel - moneyProductionCount;
+  for (let newStep = step - 1 ; newStep >= 0 ; newStep--) {
+    const newMoneyProductionLevel = moneyProductionStepMap[newStep];
+    if (newMoneyProductionLevel === targetMoneyProductionLevel) {
+      return newStep;
+    }
+  }
+  return 0;
+}
+
+function canTakeLoan(step: StepNumber): boolean {
+  return moneyProductionStepMap[step] >= -7;
+}
+
 interface Player {
   index: number,
   money: number,
@@ -79,6 +95,7 @@ class App extends React.Component<{}, AppState> {
           <hr/>
           <label>Current player: {currentPlayerIndex}</label>
           <br/>
+          <button onClick={this.onTakeLoan} disabled={!canTakeLoan(players[currentPlayerIndex - 1].moneyProductionStep)}>Take loan</button>
           <button onClick={this.onFinishTurn}>Finish turn</button>
           <br/>
           <table>
@@ -120,6 +137,16 @@ class App extends React.Component<{}, AppState> {
           ...game,
           currentPlayerIndex: newCurrentPlayerIndex,
           moveDescriptions: [...moveDescriptions, `Player ${currentPlayerIndex} finished their turn`],
+          players: game.players.map(player => {
+            if (newCurrentPlayerIndex === 1) {
+              return {
+                ...player,
+                money: player.money + moneyProductionStepMap[player.moneyProductionStep],
+              };
+            } else {
+              return player;
+            }
+          }),
         },
       };
     });
@@ -135,6 +162,31 @@ class App extends React.Component<{}, AppState> {
     this.setState(({ newGamePlayerCount }) => ({
       game: makeGame(newGamePlayerCount),
     }));
+  };
+
+  onTakeLoan = () => {
+    this.setState(({ game }) => {
+      const { currentPlayerIndex, players } = game;
+      if (!canTakeLoan(players[currentPlayerIndex - 1].moneyProductionStep)) {
+        return null;
+      }
+      return {
+        game: {
+          ...game,
+          players: game.players.map(player => {
+            if (player.index === currentPlayerIndex) {
+              return {
+                ...player,
+                money: player.money + 30,
+                moneyProductionStep: findStepForReducedMoneyProduction(player.moneyProductionStep),
+              };
+            } else {
+              return player;
+            }
+          }),
+        },
+      };
+    });
   };
 }
 
