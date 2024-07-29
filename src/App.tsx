@@ -1,40 +1,27 @@
 import React from 'react';
 import './App.css';
 
-const MinMoneyProductionLevel: number = -10;
-const MaxMoneyProductionLevel: number = 30;
-const MoneyProductionStepDescriptions: { moneyProductionLevelEnd: number, stepCount: number }[] = [
-  { moneyProductionLevelEnd: 0, stepCount: 1 },
-  { moneyProductionLevelEnd: 10, stepCount: 2 },
-  { moneyProductionLevelEnd: 20, stepCount: 3 },
-  { moneyProductionLevelEnd: 29, stepCount: 4 },
-  { moneyProductionLevelEnd: 30, stepCount: 3 },
-];
-
-// Get the money production from the step number
-type StepNumber = number
-type MoneyProductionLevel = number
-export type MoneyProductionStepMap = {[key: StepNumber]: MoneyProductionLevel}
+export type MoneyProductionStepMap = number[];
 
 export function createMoneyProductionStepMap(): MoneyProductionStepMap {
-  const stepMap: MoneyProductionStepMap = {};
-  let moneyProductionLevelStart = MinMoneyProductionLevel;
-  let stepStart = 0;
-  for (const description of MoneyProductionStepDescriptions) {
-    const moneyProductionLevelEnd = description.moneyProductionLevelEnd;
-    const stepCount = description.stepCount;
-    for (let moneyProductionLevel = moneyProductionLevelStart ; moneyProductionLevel <= moneyProductionLevelEnd ; moneyProductionLevel += 1) {
-      for (let step = stepStart ; step < stepStart + stepCount ; step += 1) {
-        stepMap[step] = moneyProductionLevel;
-      }
-      stepStart = stepStart + stepCount;
-    }
-    moneyProductionLevelStart = moneyProductionLevelEnd + 1;
+  const steps2Money: MoneyProductionStepMap = [];
+  for (let i = 0; i < 100; i++) {
+    steps2Money.push(i === 0 ? -10 : 0);
   }
-  return stepMap;
+
+  for (let i = 1; i < 100; i++) {
+    const shouldBump = (i >= 1 && i <= 10) ||
+                       (i >= 11 && i <= 29 && (i - 11) % 2 === 0) ||
+                       (i >= 31 && i <= 58 && (i - 31) % 3 === 0) ||
+                       (i >= 61 && i <= 97 && (i - 61) % 4 === 0);
+    const bump = shouldBump ? 1 : 0;
+    steps2Money[i] = steps2Money[i - 1] + bump;
+  }
+
+  return steps2Money;
 }
 
-const moneyProductionStepMap: MoneyProductionStepMap = createMoneyProductionStepMap();
+const moneyProductionStepMap: MoneyProductionStepMap = createMoneyProductionStepMap(); 
 
 interface Player {
   index: number,
