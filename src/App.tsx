@@ -22,8 +22,10 @@ export function createMoneyProductionStepMap(): MoneyProductionStepMap {
   return steps2Money;
 }
 
-const moneyProductionStepMap: MoneyProductionStepMap = createMoneyProductionStepMap(); 
+const moneyProductionStepMap: MoneyProductionStepMap = createMoneyProductionStepMap();
 
+type StepNumber = number
+type MoneyProductionLevel = number
 export function findStepForReducedMoneyProduction(step: StepNumber, moneyProductionCount: MoneyProductionLevel = 3): StepNumber {
   const currentMoneyProductionLevel = moneyProductionStepMap[step];
   const targetMoneyProductionLevel = currentMoneyProductionLevel - moneyProductionCount;
