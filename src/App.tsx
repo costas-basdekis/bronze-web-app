@@ -38,20 +38,10 @@ export function findStepForReducedMoneyProduction(step: StepNumber, moneyProduct
   return 0;
 }
 
-function canTakeLoan(step: StepNumber): boolean {
-  return moneyProductionStepMap[step] >= -7;
-}
-
 interface Player {
   index: number,
   money: number,
   moneyProductionStep: number,
-}
-
-interface Game {
-  currentPlayerIndex: number,
-  moveDescriptions: string[],
-  players: Player[],
 }
 
 interface AppState {
@@ -59,12 +49,80 @@ interface AppState {
   game: Game,
 }
 
-function makeGame(playerCount: number): Game {
-  return {
-    currentPlayerIndex: 1,
-    moveDescriptions: ["Game started"],
-    players: makePlayers(playerCount),
-  };
+interface GameProperties {
+  currentPlayerIndex: number;
+  moveDescriptions: string[];
+  players: Player[];
+}
+
+class Game {
+  currentPlayerIndex: number;
+  moveDescriptions: string[];
+  players: Player[];
+
+  static make(playerCount: number): Game {
+    return new Game({
+      currentPlayerIndex: 1,
+      moveDescriptions: ["Game started"],
+      players: makePlayers(playerCount),
+    });
+  }
+
+  constructor({currentPlayerIndex, moveDescriptions, players}: GameProperties) {
+    this.currentPlayerIndex = currentPlayerIndex;
+    this.moveDescriptions = moveDescriptions;
+    this.players = players;
+  }
+
+  _change(someProperties: Partial<GameProperties>): Game {
+    return new Game({
+      ...this,
+      ...someProperties,
+    });
+  }
+
+  canTakeLoan(): boolean {
+    return moneyProductionStepMap[this.players[this.currentPlayerIndex - 1].moneyProductionStep] >= -7;
+  }
+
+  takeLoan(): Game {
+    const { currentPlayerIndex, players } = this;
+    if (!this.canTakeLoan()) {
+      return this;
+    }
+    return this._change({
+      players: players.map(player => {
+        if (player.index === currentPlayerIndex) {
+          return {
+            ...player,
+            money: player.money + 30,
+            moneyProductionStep: findStepForReducedMoneyProduction(player.moneyProductionStep),
+          };
+        } else {
+          return player;
+        }
+      }),
+    });
+  }
+
+  finishTurn(): Game {
+    const { currentPlayerIndex, moveDescriptions, players } = this;
+    const newCurrentPlayerIndex = currentPlayerIndex === players.length ? 1 : currentPlayerIndex + 1;
+    return this._change({
+      currentPlayerIndex: newCurrentPlayerIndex,
+      moveDescriptions: [...moveDescriptions, `Player ${currentPlayerIndex} finished their turn`],
+      players: this.players.map(player => {
+        if (newCurrentPlayerIndex === 1) {
+          return {
+            ...player,
+            money: player.money + moneyProductionStepMap[player.moneyProductionStep],
+          };
+        } else {
+          return player;
+        }
+      }),
+    });
+  }
 }
 
 function makePlayers(count: number): Player[] {
@@ -83,11 +141,12 @@ function makePlayer(index: number): Player {
 class App extends React.Component<{}, AppState> {
   state: AppState = {
     newGamePlayerCount: 2,
-    game: makeGame(2),
+    game: Game.make(2),
   };
 
   render() {
-    const { newGamePlayerCount, game: {currentPlayerIndex, moveDescriptions, players} } = this.state;
+    const { newGamePlayerCount, game } = this.state;
+    const { currentPlayerIndex, moveDescriptions, players } = game;
     return (
       <div className="App">
         <header className="App-header">
@@ -97,7 +156,7 @@ class App extends React.Component<{}, AppState> {
           <hr/>
           <label>Current player: {currentPlayerIndex}</label>
           <br/>
-          <button onClick={this.onTakeLoan} disabled={!canTakeLoan(players[currentPlayerIndex - 1].moneyProductionStep)}>Take loan</button>
+          <button onClick={this.onTakeLoan} disabled={!game.canTakeLoan()}>Take loan</button>
           <button onClick={this.onFinishTurn}>Finish turn</button>
           <br/>
           <table>
@@ -132,24 +191,8 @@ class App extends React.Component<{}, AppState> {
 
   onFinishTurn = () => {
     this.setState(({ game }) => {
-      const { currentPlayerIndex, moveDescriptions, players } = game;
-      const newCurrentPlayerIndex = currentPlayerIndex === players.length ? 1 : currentPlayerIndex + 1;
       return {
-        game: {
-          ...game,
-          currentPlayerIndex: newCurrentPlayerIndex,
-          moveDescriptions: [...moveDescriptions, `Player ${currentPlayerIndex} finished their turn`],
-          players: game.players.map(player => {
-            if (newCurrentPlayerIndex === 1) {
-              return {
-                ...player,
-                money: player.money + moneyProductionStepMap[player.moneyProductionStep],
-              };
-            } else {
-              return player;
-            }
-          }),
-        },
+        game: game.finishTurn(),
       };
     });
   };
@@ -162,31 +205,14 @@ class App extends React.Component<{}, AppState> {
 
   onNewGameClick = () => {
     this.setState(({ newGamePlayerCount }) => ({
-      game: makeGame(newGamePlayerCount),
+      game: Game.make(newGamePlayerCount),
     }));
   };
 
   onTakeLoan = () => {
     this.setState(({ game }) => {
-      const { currentPlayerIndex, players } = game;
-      if (!canTakeLoan(players[currentPlayerIndex - 1].moneyProductionStep)) {
-        return null;
-      }
       return {
-        game: {
-          ...game,
-          players: game.players.map(player => {
-            if (player.index === currentPlayerIndex) {
-              return {
-                ...player,
-                money: player.money + 30,
-                moneyProductionStep: findStepForReducedMoneyProduction(player.moneyProductionStep),
-              };
-            } else {
-              return player;
-            }
-          }),
-        },
+        game: game.takeLoan(),
       };
     });
   };
