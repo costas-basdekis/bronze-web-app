@@ -1,4 +1,4 @@
-import {MoneyProductionStepMap, createMoneyProductionStepMap, findStepForReducedMoneyProduction} from './App';
+import {createMoneyProductionStepMap, findStepForReducedMoneyProduction, MoneyProductionStepMap} from "./Game";
 
 describe("createMoneyProductionStepMap", () => {
   const moneyProductionStepMap: MoneyProductionStepMap = createMoneyProductionStepMap();
