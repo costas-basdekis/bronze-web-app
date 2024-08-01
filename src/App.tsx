@@ -1,6 +1,7 @@
 import React, {ChangeEvent} from 'react';
 import './App.css';
 import {Game, moneyProductionStepMap} from "./Game";
+import './Tiles'
 
 interface AppState {
   newGamePlayerCount: number,
