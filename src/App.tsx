@@ -64,8 +64,21 @@ class Game {
     return new Game({
       currentPlayerIndex: 1,
       moveDescriptions: ["Game started"],
-      players: makePlayers(playerCount),
+      players: this._makePlayers(playerCount),
     });
+  }
+
+  static _makePlayers(count: number): Player[] {
+    return _.range(1, count + 1)
+      .map(index => this._makePlayer(index));
+  }
+
+  static _makePlayer(index: number): Player {
+    return {
+      index: index,
+      money: 17,
+      moneyProductionStep: 10,
+    };
   }
 
   constructor({currentPlayerIndex, moveDescriptions, players}: GameProperties) {
@@ -123,19 +136,6 @@ class Game {
       }),
     });
   }
-}
-
-function makePlayers(count: number): Player[] {
-  return _.range(1, count + 1)
-    .map(index => makePlayer(index));
-}
-
-function makePlayer(index: number): Player {
-  return {
-    index: index,
-    money: 17,
-    moneyProductionStep: 10,
-  };
 }
 
 class App extends React.Component<{}, AppState> {
