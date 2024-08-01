@@ -48,7 +48,7 @@ interface GameProperties {
   players: Player[];
 }
 
-export class Game {
+export class Game implements GameProperties {
   currentPlayerIndex: number;
   moveDescriptions: string[];
   players: Player[];
@@ -74,10 +74,10 @@ export class Game {
     };
   }
 
-  constructor({currentPlayerIndex, moveDescriptions, players}: GameProperties) {
-    this.currentPlayerIndex = currentPlayerIndex;
-    this.moveDescriptions = moveDescriptions;
-    this.players = players;
+  constructor(properties: GameProperties) {
+    this.currentPlayerIndex = properties.currentPlayerIndex;
+    this.moveDescriptions = properties.moveDescriptions;
+    this.players = properties.players;
   }
 
   _change(someProperties: Partial<GameProperties>): Game {
