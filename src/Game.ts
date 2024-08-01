@@ -53,6 +53,12 @@ export class Game implements GameProperties {
   moveDescriptions: string[];
   players: Player[];
 
+  /**
+   * Create a new game from start.
+   *
+   * @param playerCount - The number of players
+   * @returns A new game
+   */
   static make(playerCount: number): Game {
     return new Game({
       currentPlayerIndex: 1,
@@ -87,10 +93,16 @@ export class Game implements GameProperties {
     });
   }
 
+  /**
+  * Check if the current player can take a loan
+  */
   canTakeLoan(): boolean {
     return moneyProductionStepMap[this.players[this.currentPlayerIndex - 1].moneyProductionStep] >= -7;
   }
 
+  /**
+   * Make the current player take a loan
+   */
   takeLoan(): Game {
     const {currentPlayerIndex, players} = this;
     if (!this.canTakeLoan()) {
@@ -111,6 +123,9 @@ export class Game implements GameProperties {
     });
   }
 
+  /**
+   * Finish the current player's turn. If it's the last player, it also ends the round
+   */
   finishTurn(): Game {
     const {currentPlayerIndex, moveDescriptions, players} = this;
     const newCurrentPlayerIndex = currentPlayerIndex === players.length ? 1 : currentPlayerIndex + 1;
