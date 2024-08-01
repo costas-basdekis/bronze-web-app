@@ -136,7 +136,7 @@ export class Game implements GameProperties {
         if (newCurrentPlayerIndex === 1) {
           return {
             ...player,
-            money: player.money + moneyProductionStepMap[player.moneyProductionStep],
+            money: Math.max(0, player.money + moneyProductionStepMap[player.moneyProductionStep]),
           };
         } else {
           return player;
