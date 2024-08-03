@@ -2,6 +2,7 @@ import React, {ChangeEvent} from 'react';
 import './App.css';
 import {Game, moneyProductionStepMap} from "./Game";
 import './Tiles'
+import {Building, initialPlayerTiles} from "./Tiles";
 
 interface AppState {
   newGamePlayerCount: number,
@@ -49,6 +50,23 @@ class App extends React.Component<{}, AppState> {
             ))}
             </tbody>
           </table>
+          {players.map(player => <>
+            <h2>Player {player.index}</h2>
+            <ul>
+              {(Array.from(player.remainingTiles.keys()) as Building[]).map(building => (
+                <li>
+                  {building}:
+                  {player.remainingTiles.get(building)!.length > 0 ? <>
+                    {" "}L{player.remainingTiles.get(building)![0].tile.level}
+                    {" "}x {player.remainingTiles.get(building)![0].count}
+                    {currentPlayerIndex === player.index ? (
+                      <button onClick={() => this.onDevelop(building)}>Develop</button>
+                    ) : null}
+                  </> : " No more buildings"}
+                </li>
+              ))}
+            </ul>
+          </>)}
           <ol>
             {moveDescriptions.map(description => (
               <li>{description}</li>
@@ -86,6 +104,14 @@ class App extends React.Component<{}, AppState> {
       };
     });
   };
+
+  onDevelop = (building: Building) => {
+    this.setState(({ game }) => {
+      return {
+        game: game.develop(building),
+      };
+    });
+  }
 }
 
 export default App;

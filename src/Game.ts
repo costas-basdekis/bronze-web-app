@@ -1,4 +1,5 @@
 import _ from "underscore";
+import {Building, initialPlayerTiles, PlayerTiles} from "./Tiles";
 
 export type MoneyProductionStepMap = number[];
 
@@ -40,6 +41,7 @@ interface Player {
   index: number,
   money: number,
   moneyProductionStep: number,
+  remainingTiles: PlayerTiles,
 }
 
 interface GameProperties {
@@ -77,6 +79,7 @@ export class Game implements GameProperties {
       index: index,
       money: 17,
       moneyProductionStep: 10,
+      remainingTiles: initialPlayerTiles,
     };
   }
 
@@ -120,6 +123,50 @@ export class Game implements GameProperties {
           return player;
         }
       }),
+    });
+  }
+
+  canDevelop(building: Building): boolean {
+    const {currentPlayerIndex, players} = this;
+    const currentPlayer = players[currentPlayerIndex - 1];
+    const levels = currentPlayer.remainingTiles.get(building)!;
+    if (levels.length === 0) {
+      return false;
+    }
+    const currentLevel = levels[0];
+    return currentLevel.tile.canBeDeveloped;
+  }
+
+  develop(building: Building): Game {
+    if (!this.canDevelop(building)) {
+      return this;
+    }
+    const {currentPlayerIndex, players} = this;
+    return this._change({
+      players: players.map(player => {
+        if (player.index === currentPlayerIndex) {
+          const newRemainingTiles = new Map(player.remainingTiles);
+          const currentLevel = newRemainingTiles.get(building)![0];
+          const restLevels = newRemainingTiles.get(building)!.slice(1);
+          if (currentLevel.count === 1) {
+            newRemainingTiles.set(building, restLevels);
+          } else {
+            newRemainingTiles.set(building, [
+              {
+                ...currentLevel,
+                count: currentLevel.count - 1,
+              },
+              ...restLevels,
+            ]);
+          }
+          return {
+            ...player,
+            remainingTiles: newRemainingTiles,
+          };
+        } else {
+          return player;
+        }
+      })
     });
   }
 
