@@ -3,21 +3,21 @@ import _ from "underscore";
 export type MoneyProductionStepMap = number[];
 
 export function createMoneyProductionStepMap(): MoneyProductionStepMap {
-  const steps2Money: MoneyProductionStepMap = [];
-  for (let i = 0; i < 100; i++) {
-    steps2Money.push(i === 0 ? -10 : 0);
-  }
+  const stepMap: MoneyProductionStepMap = new Array(100).fill(0);
+  stepMap[0] = -10;
 
   for (let i = 1; i < 100; i++) {
-    const shouldBump = (i >= 1 && i <= 10) ||
-      (i >= 11 && i <= 29 && (i - 11) % 2 === 0) ||
-      (i >= 31 && i <= 58 && (i - 31) % 3 === 0) ||
-      (i >= 61 && i <= 97 && (i - 61) % 4 === 0);
+    const shouldBump = (
+      (i >= 1 && i <= 10) 
+      || (i >= 11 && i <= 29 && (i - 11) % 2 === 0) 
+      || (i >= 31 && i <= 58 && (i - 31) % 3 === 0) 
+      || (i >= 61 && i <= 97 && (i - 61) % 4 === 0)
+    );
     const bump = shouldBump ? 1 : 0;
-    steps2Money[i] = steps2Money[i - 1] + bump;
+    stepMap[i] = stepMap[i - 1] + bump;
   }
 
-  return steps2Money;
+  return stepMap;
 }
 
 export const moneyProductionStepMap: MoneyProductionStepMap = createMoneyProductionStepMap();
