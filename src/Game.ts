@@ -9,9 +9,9 @@ export function createMoneyProductionStepMap(): MoneyProductionStepMap {
 
   for (let i = 1; i < 100; i++) {
     const shouldBump = (
-      (i >= 1 && i <= 10) 
-      || (i >= 11 && i <= 29 && (i - 11) % 2 === 0) 
-      || (i >= 31 && i <= 58 && (i - 31) % 3 === 0) 
+      (i >= 1 && i <= 10)
+      || (i >= 11 && i <= 29 && (i - 11) % 2 === 0)
+      || (i >= 31 && i <= 58 && (i - 31) % 3 === 0)
       || (i >= 61 && i <= 97 && (i - 61) % 4 === 0)
     );
     const bump = shouldBump ? 1 : 0;
