@@ -31,27 +31,70 @@ export interface Tile {
   canBeBuiltInRailroad: boolean,
 }
 
-export const initialPlayerTiles: Map<Building, {tile: Tile, count: number}[]> = new Map([
-  [Building.Food, [
-    {
+interface TileDescription {
+  tile: Tile,
+  count: number,
+}
+
+export type PlayerTiles = Map<Building, TileDescription[]>;
+
+function makeTiles(
+  commonProperties: {building: Building} & Partial<Tile>,
+  tilesPropertyNames: (keyof Tile)[],
+  tilesProperties: {count: number, values: any[], extra?: Partial<Tile>}[],
+): [Building, TileDescription[]] {
+  /**
+   * Define tiles for a building, by defining:
+   *  1. Common properties for all levels
+   *  2. The keys of the properties that will be variable for each level
+   *  3. The values of the properties for the defined keys
+   *  4. Plus optionally some extra values
+   *
+   * @param commonProperties - The properties that are common to all building levels
+   * @param tilePropertyNames - The names of the properties that each level has to define
+   * @param tileProperties - The specification of each level. The `values` attribute needs to be in the same order as
+   *  the `tilePropertyNames`
+   */
+  return [
+    commonProperties.building,
+    tilesProperties.map(tileProperties => ({
       tile: {
-        building: Building.Food,
-        level: 1,
-        monetaryBuildCost: 8,
-        fuelBuildCost: 1,
-        steelBuildCost: 0,
-        beerSellCost: 1,
-        pointsReward: 3,
-        moneyProductionReward: 5,
-        canalResourceReward: 0,
-        rewardResource: null,
-        railroadResourceReward: 0,
-        linkCount: 2,
-        canBeDeveloped: true,
-        canBeBuiltInCanal: true,
-        canBeBuiltInRailroad: false,
-      },
-      count: 1,
-    },
-  ]],
+        ...commonProperties,
+        ...Object.fromEntries(tilesPropertyNames.map(
+          (name, index) => [name, tileProperties.values[index]])),
+        ...tileProperties.extra,
+      } as Tile,
+      count: tileProperties.count,
+    })),
+  ];
+}
+
+export const initialPlayerTiles: PlayerTiles = new Map([
+  makeTiles({
+    building: Building.Food,
+    canalResourceReward: 0,
+    rewardResource: null,
+    railroadResourceReward: 0,
+    canBeDeveloped: true,
+    canBeBuiltInCanal: true,
+    canBeBuiltInRailroad: true,
+  }, [
+    "level",
+    "monetaryBuildCost",
+    "fuelBuildCost",
+    "steelBuildCost",
+    "beerSellCost",
+    "pointsReward",
+    "moneyProductionReward",
+    "linkCount",
+  ], [
+    {count: 1, values: [1, 8, 1, 0, 1, 3, 5, 2], extra: {canBeBuiltInRailroad: false}},
+    {count: 2, values: [2, 10, 0, 1, 1, 5, 0, 1]},
+    {count: 1, values: [3, 12, 2, 0, 0, 4, 4, 0]},
+    {count: 1, values: [4, 14, 0, 1, 1, 3, 7, 1]},
+    {count: 2, values: [5, 16, 1, 0, 2, 8, 2, 2]},
+    {count: 1, values: [6, 20, 0, 0, 1, 7, 6, 1]},
+    {count: 1, values: [7, 16, 1, 1, 0, 9, 4, 0]},
+    {count: 2, values: [8, 20, 0, 2, 1, 11, 1, 1]},
+  ]),
 ]);
