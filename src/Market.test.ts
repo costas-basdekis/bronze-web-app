@@ -40,4 +40,43 @@ describe("Market", () => {
       expect(market.getResourceCost(5)).toEqual(40);
     });
   });
+  describe("getResourceBenefit", () => {
+    it("gets correct benefit of resource starting from 0 open slots", () => {
+      const market = new Market({
+        resource: Resource.Fuel,
+        maxOpenSlots: 14,
+        openSlots: 0,
+      });
+      expect(market.getResourceBenefit(1)).toEqual(0);
+      expect(market.getResourceBenefit(2)).toEqual(0);
+      expect(market.getResourceBenefit(3)).toEqual(0);
+      expect(market.getResourceBenefit(4)).toEqual(0);
+      expect(market.getResourceBenefit(5)).toEqual(0);
+    });
+    it("gets correct cost of resource starting from 4 open slots", () => {
+      const market = new Market({
+        resource: Resource.Fuel,
+        maxOpenSlots: 14,
+        openSlots: 4,
+      });
+      expect(market.getResourceBenefit(1)).toEqual(2);
+      expect(market.getResourceBenefit(2)).toEqual(4);
+      expect(market.getResourceBenefit(3)).toEqual(5);
+      expect(market.getResourceBenefit(4)).toEqual(6);
+      expect(market.getResourceBenefit(5)).toEqual(6);
+    });
+    it("gets correct cost of resource starting from max open slots", () => {
+      const market = new Market({
+        resource: Resource.Fuel,
+        maxOpenSlots: 14,
+        openSlots: 14,
+      });
+      expect(market.getResourceBenefit(1)).toEqual(7);
+      expect(market.getResourceBenefit(2)).toEqual(14);
+      expect(market.getResourceBenefit(3)).toEqual(20);
+      expect(market.getResourceBenefit(4)).toEqual(26);
+      expect(market.getResourceBenefit(5)).toEqual(31);
+    });
+  });
 });
+

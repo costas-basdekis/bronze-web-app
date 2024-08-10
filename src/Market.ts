@@ -33,14 +33,16 @@ export class Market implements MarketProperties {
     return cost;
   }
 
-  getResourceCostForOpenSlots(openSlots: number): number {
-    if (openSlots > this.maxOpenSlots) {
-      openSlots = this.maxOpenSlots;
+  getResourceBenefit(count: number): number {
+    count = Math.min(count, this.openSlots);
+    let benefit = 0;
+    for (const openSlots of _.range(this.openSlots  - count, this.openSlots)) {
+      benefit += this.getResourceCostForOpenSlots(openSlots);
     }
-    return Math.floor(openSlots / 2) + 1;
+    return benefit;
   }
 
-
+  getResourceCostForOpenSlots(openSlots: number): number {
+    return Math.floor(Math.min(openSlots, this.maxOpenSlots) / 2) + 1;
+  }
 }
-
-
