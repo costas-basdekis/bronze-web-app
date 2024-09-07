@@ -2,7 +2,7 @@ import React, {ChangeEvent} from 'react';
 import './App.css';
 import {Game, moneyProductionStepMap} from "./Game";
 import './Tiles'
-import {Building, initialPlayerTiles} from "./Tiles";
+import {Building} from "./Tiles";
 
 interface AppState {
   newGamePlayerCount: number,
@@ -28,7 +28,7 @@ class App extends React.Component<{}, AppState> {
           <label>Current player: {currentPlayerIndex}</label>
           <br/>
           <button onClick={this.onTakeLoan} disabled={!game.canTakeLoan()}>Take loan</button>
-          <button onClick={this.onFinishTurn}>Finish turn</button>
+          <button onClick={this.onFinishTurn} disabled={game.canTakeAction()}>Finish turn</button>
           <br/>
           <table>
             <thead>
