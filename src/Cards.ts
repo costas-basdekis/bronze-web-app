@@ -10,10 +10,65 @@ export interface Card {
   isWild: boolean,
 }
 
-export interface Deck {
-  playerCount: PlayerCount,
-  cards: Card[],
-  initialCards: Card[],
+interface DeckProperties {
+  playerCount: PlayerCount;
+  cards: Card[];
+  initialCards: Card[];
+}
+
+export class Deck implements DeckProperties {
+  playerCount: PlayerCount;
+  cards: Card[];
+  initialCards: Card[];
+
+  static makeDeck(playerCount: PlayerCount, deckDescription: DeckDescription = originalDeckDescription): Deck {
+    const cards = deckDescription.cardsByPlayerCount.get(playerCount)!;
+    return new Deck({
+      playerCount,
+      cards: _.shuffle(cards),
+      initialCards: cards,
+    });
+  }
+
+  constructor(properties: DeckProperties) {
+    this.playerCount = properties.playerCount;
+    this.cards = properties.cards;
+    this.initialCards = properties.initialCards;
+  }
+
+  _change(someProperties: Partial<DeckProperties>): Deck {
+    return new Deck({
+      ...this,
+      ...someProperties,
+    });
+  }
+
+  discardCards(count: number): Deck {
+    if (this.cards.length < count) {
+      throw new Error("Deck is too small to discard");
+    }
+    return this._change({
+      cards: this.cards.slice(count),
+    });
+  }
+
+  drawCards(count: number): [Card[], Deck] {
+    if (this.cards.length < count) {
+      throw new Error("Deck is too small to draw");
+    }
+    return [
+      this.cards.slice(0, count),
+      this._change({
+       cards: this.cards.slice(count),
+      })
+    ];
+  }
+
+  reshuffle(): Deck {
+    return this._change({
+      cards: _.shuffle(this.initialCards),
+    });
+  }
 }
 
 export interface DeckDescription {
@@ -125,13 +180,4 @@ export const WildBuilding: Card = {
   area: null,
   buildings: null,
   isWild: true,
-}
-
-export function makeDeck(deckDescription: DeckDescription, playerCount: PlayerCount): Deck {
-  const cards = deckDescription.cardsByPlayerCount.get(playerCount)!;
-  return {
-    playerCount,
-    cards,
-    initialCards: cards,
-  }
 }
