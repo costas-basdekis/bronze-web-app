@@ -25,7 +25,9 @@ class App extends React.Component<{}, AppState> {
           <label>Player count: {newGamePlayerCount} <input type={"range"} min={2} max={4} step={1} defaultValue={2} onChange={this.onNewGamePlayerCount} /></label>
           <button onClick={this.onNewGameClick}>New game</button>
           <hr/>
+          <label>Current round: {game.currentRound}</label>
           <label>Current player: {currentPlayerIndex}</label>
+          <label>Cards remaining: {game.remainingCardCount}</label>
           <br/>
           <button onClick={this.onTakeLoan} disabled={!game.canTakeLoan()}>Take loan</button>
           <button onClick={this.onFinishTurn} disabled={game.canTakeAction()}>Finish turn</button>
@@ -34,6 +36,7 @@ class App extends React.Component<{}, AppState> {
             <thead>
             <tr>
               <th>Player</th>
+              <th>Card count</th>
               <th>Money</th>
               <th>Money production (step)</th>
               <th>Status</th>
@@ -43,6 +46,7 @@ class App extends React.Component<{}, AppState> {
             {players.map(player => (
               <tr>
                 <td>{player.index}</td>
+                <td>{player.cardCount}</td>
                 <td>{player.money}</td>
                 <td>{moneyProductionStepMap[player.moneyProductionStep]} ({player.moneyProductionStep})</td>
                 <td>{currentPlayerIndex === player.index ? "Playing" : ""}</td>
@@ -60,7 +64,7 @@ class App extends React.Component<{}, AppState> {
                     {" "}L{player.remainingTiles.get(building)![0].tile.level}
                     {" "}x {player.remainingTiles.get(building)![0].count}
                     {currentPlayerIndex === player.index ? (
-                      <button onClick={() => this.onDevelop(building)}>Develop</button>
+                      <button onClick={() => this.onDevelop(building)} disabled={!game.canDevelop(building)}>Develop</button>
                     ) : null}
                   </> : " No more buildings"}
                 </li>
